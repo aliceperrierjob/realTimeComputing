@@ -1,0 +1,77 @@
+import java.util.Random;
+
+public class CalculMatriciel2 {
+	
+	public static int N = 10;
+	public static int iCut, jCut;
+	static double debut, fin, time;
+	
+	public static void main(String[] args) {
+		
+		// INITIALISATION
+		
+		Matrice A = new Matrice(N, "Matrice A");
+		Matrice B = new Matrice(N, "Matrice B");
+		Matrice C = new Matrice(N, "Matrice C");
+		
+		for (int i = 0 ; i < N ; i++) {
+			for (int j = 0 ; j < N ; j++) {
+				A.remplir(i, j, 1);
+				B.remplir(i,  j,  i * N + j);
+			}
+		}
+		
+		//A.afficher();
+		//B.afficher();
+		
+		// CALCUL SANS THREADS
+		
+		debut = System.nanoTime();
+		
+		for (int i = 0 ; i < N ; i++) {
+			for (int j = 0 ; j < N ; j++) {
+				C.remplir(i,  j,  A.get(i,  j) + B.get(i,  j));
+			}
+		}
+		
+		fin = System.nanoTime();
+		time = (fin - debut) / Math.pow(10, 9);
+		
+		//C.afficher();
+		
+		System.out.println("Temps de calcul sans threads " + time + " s.");
+		
+		System.out.println("-------------------------");
+		
+		// CALCUL AVEC THREADS
+		
+		debut = System.nanoTime();
+		
+		iCut = new Random().nextInt(N);
+		jCut = new Random().nextInt(N);
+		
+		Calcul C1 = new Calcul(A, B, C, 0, iCut, 0, jCut);
+		Calcul C2 = new Calcul(A, B, C, iCut, N, 0, jCut);
+		Calcul C3 = new Calcul(A, B, C, 0, iCut, jCut, N);
+		Calcul C4 = new Calcul(A, B, C, iCut, N, jCut, N);
+		
+		try {
+			C1.join();
+			C2.join();
+			C3.join();
+			C4.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		fin = System.nanoTime();
+		time = (fin - debut) / Math.pow(10, 9);
+		
+		//C.afficher();
+		
+		System.out.println("Temps de calcul avec threads " + time + " s.");
+		
+	}
+
+}
